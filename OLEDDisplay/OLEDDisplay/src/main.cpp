@@ -20,9 +20,28 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 void DisplayUpdatePressureGenerator( float nValue);
 void DisplayUpdatePressureFeed( float nValue);
+float ConvertToPSI30Sensor(float nVoltage);
 
 float i=0;
 float j=100;
+
+
+const int PINGenerator = 36;
+const int PINFeed = 39;
+// const int PINGeneratorB = 34;
+// const int PINFeedB = 35;
+
+
+int nRawGeneratorCounts = 0;
+int nRawFeedCounts = 0;
+double nGeneratorVoltage=0;
+double nFeedVoltage=0;
+double nGeneratorPressurePSI=0;
+double nFeedPressurePSI=0;
+
+
+const float nVoltageScaleFactor = 5/4095;
+
 
 void setup() {
   Serial.begin(115200);
@@ -51,24 +70,51 @@ void setup() {
   // drawing commands to make them visible on screen!
   display.display();
   delay(200);
+  analogSetAttenuation(ADC_11db);
 }
 
 void loop() {
   i=i+0.5;
   j=j-0.5;
-  DisplayUpdatePressureGenerator(i);
-  DisplayUpdatePressureFeed(j);
+  
+  // delay(100);
+  // if (i>=100){
+  //   i=0;
+  // }
+  // if (j<=1){
+  //   j=100;
+  // }
+
+  nRawGeneratorCounts = analogRead(PINGenerator);
+  nRawFeedCounts = analogRead(PINFeed);
+
+  // nGeneratorVoltage = (3.3 * float(nRawGeneratorCounts)) / (4095);
+  // nFeedVoltage = (3.3 * float(nRawFeedCounts)) / (4095);
+
+  nGeneratorVoltage = (float(nRawGeneratorCounts)*0.0012)+ 0.2014;
+  nFeedVoltage = (float(nRawFeedCounts)*0.0012)+ 0.2014;
+ 
+
+  delay(700);
+  Serial.printf("Generator[V]: %f \t, feed[V]:  %f , counts: %d %d",nGeneratorVoltage,nFeedVoltage,nRawGeneratorCounts,nRawFeedCounts);
+
+  Serial.println();
+  Serial.println(nGeneratorVoltage);
+  delay(700);
+
+  nGeneratorPressurePSI=ConvertToPSI30Sensor(nGeneratorVoltage);
+  DisplayUpdatePressureGenerator(nGeneratorPressurePSI);
+  nFeedPressurePSI=ConvertToPSI30Sensor(nFeedVoltage);
+  DisplayUpdatePressureFeed(nFeedPressurePSI);
   display.display();
-  delay(100);
-  if (i>=100){
-    i=0;
-  }
-  if (j<=1){
-    j=100;
-  }
+
 }
 
-
+float ConvertToPSI30Sensor(float nVoltage){
+  float nResult=0;
+  nResult= (nVoltage*7.5)-3.75;
+  return nResult;
+}
 
 
 #define GEN_GAUGE_HEIGHT   12
