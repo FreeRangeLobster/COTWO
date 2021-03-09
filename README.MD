@@ -62,7 +62,7 @@ Once the pressure of the system reaches 1Bar the system is self sustainable and 
 
 - [x] Breadboard prototype
 - [x] Pressurise the system
-- [ ] ESP32 ADC characterisation curve- Done, not great but good enough see "ESP ADC Characterisation.xlsx"
+- [x] ESP32 ADC characterisation curve- Done, not great but good enough see "ESP ADC Characterisation.xlsx"
 - [ ] Document  the BOM
 - [ ] Assemble vero board
 - [ ] Enclosure for the display and the PCB
